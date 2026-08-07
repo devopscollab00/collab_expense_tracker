@@ -508,6 +508,9 @@
     .report-print {
       background: white;
       position: relative;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
     }
     
     .report-header {
@@ -575,28 +578,40 @@
       border-collapse: collapse;
       margin: 20px 0;
       font-size: 12px;
+      table-layout: fixed;
     }
     
     .report-table th {
       background: #1e3a8a;
       color: white;
-      padding: 10px 5px;
+      padding: 12px 8px;
       text-align: left;
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 9px;
-      letter-spacing: 0.2px;
-      line-height: 1.2;
+      font-size: 8px;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
       word-wrap: break-word;
-      vertical-align: top;
+      vertical-align: middle;
+      white-space: normal;
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .report-table th:last-child {
+      border-right: none;
     }
     
     .report-table td {
-      padding: 10px 5px;
+      padding: 12px 8px;
       border-bottom: 1px solid #e5e7eb;
       font-size: 11px;
       word-break: break-word;
       vertical-align: top;
+      border-right: 1px solid #f3f4f6;
+    }
+    
+    .report-table td:last-child {
+      border-right: none;
     }
     
     .report-table tbody tr:hover {
@@ -711,12 +726,13 @@
       }
       
       .report-table th {
-        font-size: 10px;
-        padding: 12px 8px;
+        font-size: 9px;
+        padding: 12px 10px;
+        letter-spacing: 0.6px;
       }
       
       .report-table td {
-        padding: 12px 8px;
+        padding: 12px 10px;
         font-size: 12px;
       }
     }
@@ -800,12 +816,13 @@
       }
       
       .report-table th {
-        font-size: 11px;
-        padding: 14px 10px;
+        font-size: 10px;
+        padding: 14px 12px;
+        letter-spacing: 0.8px;
       }
       
       .report-table td {
-        padding: 14px 10px;
+        padding: 14px 12px;
         font-size: 13px;
       }
       
@@ -1214,12 +1231,12 @@
         <table class="report-table">
           <thead>
             <tr>
-              <th style="width: 14%;">DATE</th>
-              <th style="width: 16%;">EXPENSE ID</th>
-              <th style="width: 17%;">LOCATION</th>
-              <th style="width: 18%;">DESCRIPTION</th>
-              <th style="width: 17%;">PERSONNEL</th>
-              <th style="width: 18%; text-align: right;">AMOUNT</th>
+              <th style="width: 15%; padding: 12px 8px;">DATE</th>
+              <th style="width: 15%; padding: 12px 8px;">EXPENSE<br>ID</th>
+              <th style="width: 16%; padding: 12px 8px;">LOCATION</th>
+              <th style="width: 17%; padding: 12px 8px;">DESCRIPTION</th>
+              <th style="width: 17%; padding: 12px 8px;">PERSONNEL</th>
+              <th style="width: 20%; text-align: right; padding: 12px 8px;">AMOUNT</th>
             </tr>
           </thead>
           <tbody>
@@ -1289,35 +1306,48 @@
       
       showToast('Generating PDF... Please wait', 'info');
       
-      // Clone the report container to avoid modifying the original
-      const element = reportContainer.cloneNode(true);
-      element.style.display = 'block';
-      element.style.padding = '20px';
-      element.style.background = 'white';
+      // Get only the report-print content (not the entire container with borders)
+      const element = document.querySelector('.report-print');
+      
+      if (!element) {
+        showToast('Report content not found!', 'error');
+        return;
+      }
       
       const opt = {
-        margin: [10, 10, 10, 10],
+        margin: 15,
         filename: `Expense_Report_${year}_M${month}_W${week}_${encodedBy.replace(/\s+/g, '_')}.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
+        image: { 
+          type: 'jpeg', 
+          quality: 0.98 
+        },
         html2canvas: { 
           scale: 2,
           useCORS: true,
           letterRendering: true,
           logging: false,
-          windowWidth: 1200,
-          windowHeight: element.scrollHeight
+          scrollY: 0,
+          scrollX: 0,
+          windowWidth: element.scrollWidth,
+          windowHeight: element.scrollHeight,
+          backgroundColor: '#ffffff'
         },
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
-          orientation: 'portrait',
-          compress: true
+          orientation: 'portrait'
         },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        pagebreak: { 
+          mode: ['avoid-all', 'css', 'legacy'],
+          before: '.page-break-before',
+          after: '.page-break-after',
+          avoid: '.report-table'
+        }
       };
       
-      // Use the cloned element for PDF generation
-      html2pdf().set(opt).from(element).save().then(() => {
+      // Generate PDF
+      html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+        pdf.save(opt.filename);
         showToast('PDF downloaded successfully!', 'success');
       }).catch(error => {
         console.error('PDF generation error:', error);
