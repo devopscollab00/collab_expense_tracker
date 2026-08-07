@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Expense Tracker Dashboard - Vercel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -16,63 +17,69 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 10px;
       color: #1f2937;
+      overflow-x: hidden;
     }
     
     .dashboard-container {
       max-width: 1400px;
       margin: 0 auto;
       background: white;
-      border-radius: 20px;
-      padding: 40px;
+      border-radius: 15px;
+      padding: 15px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     }
     
     .header {
       text-align: center;
-      margin-bottom: 40px;
-      padding-bottom: 25px;
-      border-bottom: 4px solid #dc2626;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #dc2626;
       background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-      padding: 30px;
-      border-radius: 15px;
+      padding: 20px 15px;
+      border-radius: 12px;
       box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
     }
     
     .header h1 {
-      font-size: 42px;
+      font-size: 22px;
       font-weight: 800;
       color: #ffffff;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      letter-spacing: 1px;
-      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
     }
     
     .header p {
       color: #dbeafe;
-      font-size: 16px;
+      font-size: 12px;
       font-weight: 500;
     }
     
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-bottom: 40px;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
     }
     
     .stat-card {
       background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-      border-radius: 15px;
-      padding: 30px;
+      border-radius: 12px;
+      padding: 20px 15px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      border-left: 6px solid #1e3a8a;
+      border-left: 5px solid #1e3a8a;
       transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    
+    .stat-card:active {
+      transform: scale(0.98);
     }
     
     .stat-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
     
@@ -85,19 +92,20 @@
     }
     
     .stat-label {
-      font-size: 14px;
+      font-size: 11px;
       color: #6b7280;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
     
     .stat-value {
-      font-size: 42px;
+      font-size: 28px;
       font-weight: 800;
       color: #1e3a8a;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      word-break: break-all;
     }
     
     .stat-value.expense {
@@ -109,44 +117,49 @@
     }
     
     .stat-subtitle {
-      font-size: 13px;
+      font-size: 11px;
       color: #9ca3af;
       font-weight: 500;
     }
     
     .section {
       background: white;
-      border-radius: 15px;
-      padding: 30px;
-      margin-bottom: 30px;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       border: 2px solid #e5e7eb;
     }
     
     .section-title {
-      font-size: 24px;
+      font-size: 16px;
       font-weight: 800;
       color: #1e3a8a;
-      margin-bottom: 25px;
+      margin-bottom: 15px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     
     .categories-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
     
     .category-item {
       background: #f9fafb;
-      padding: 20px;
+      padding: 15px;
       border-radius: 10px;
       border-left: 4px solid #1e3a8a;
-      transition: transform 0.2s;
+      transition: transform 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+    
+    .category-item:active {
+      transform: scale(0.98);
     }
     
     .category-item:hover {
@@ -155,20 +168,20 @@
     }
     
     .category-name {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
       color: #1f2937;
       margin-bottom: 8px;
     }
     
     .category-amount {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 800;
       color: #dc2626;
     }
     
     .category-count {
-      font-size: 12px;
+      font-size: 11px;
       color: #6b7280;
       margin-top: 5px;
     }
@@ -179,15 +192,15 @@
     }
     
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
     
     .form-group label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       font-weight: 700;
       color: #1e3a8a;
-      font-size: 14px;
+      font-size: 12px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -195,13 +208,15 @@
     .form-group select,
     .form-group input {
       width: 100%;
-      padding: 12px 16px;
+      padding: 12px 14px;
       border: 2px solid #1e3a8a;
       border-radius: 8px;
       font-size: 14px;
       font-family: inherit;
       background: white;
       font-weight: 600;
+      -webkit-appearance: none;
+      appearance: none;
     }
     
     .form-group select:focus,
@@ -213,21 +228,28 @@
     
     .form-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
+      grid-template-columns: 1fr;
+      gap: 15px;
     }
     
     .btn {
-      padding: 14px 28px;
+      width: 100%;
+      padding: 16px 20px;
       border: none;
       border-radius: 10px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
     }
     
     .btn-primary {
@@ -238,7 +260,6 @@
     
     .btn-primary:hover {
       background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
-      transform: translateY(-3px);
       box-shadow: 0 6px 25px rgba(30, 58, 138, 0.3);
     }
     
@@ -250,29 +271,198 @@
     
     .btn-danger:hover {
       background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
-      transform: translateY(-3px);
       box-shadow: 0 6px 25px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+      border: 2px solid #059669;
+    }
+    
+    .btn-success:hover {
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      box-shadow: 0 6px 25px rgba(5, 150, 105, 0.3);
+    }
+    
+    .btn-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
     }
     
     .loading {
       text-align: center;
-      padding: 60px 20px;
+      padding: 40px 20px;
       color: #6b7280;
     }
     
     .spinner {
-      border: 5px solid #f3f4f6;
-      border-top: 5px solid #dc2626;
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #dc2626;
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       animation: spin 1s linear infinite;
-      margin: 0 auto 25px;
+      margin: 0 auto 20px;
     }
     
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+    
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 280px;
+      max-width: 90%;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    
+    .toast-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .toast-message {
+      flex: 1;
+      font-weight: 600;
+      font-size: 14px;
+      color: #1f2937;
+    }
+    
+    .toast.success {
+      border-left: 4px solid #059669;
+    }
+    
+    .toast.error {
+      border-left: 4px solid #dc2626;
+    }
+    
+    .toast.info {
+      border-left: 4px solid #1e3a8a;
+    }
+    
+    .toast.warning {
+      border-left: 4px solid #f59e0b;
+    }
+    
+    /* Modal/Popup */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1e3a8a;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #6b7280;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    
+    .modal-close:hover {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+    
+    .modal-body {
+      color: #4b5563;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    
+    .modal-footer {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px solid #e5e7eb;
+      display: flex;
+      gap: 10px;
     }
     
     /* Print Styles */
@@ -294,16 +484,20 @@
       .report-print {
         page-break-inside: avoid;
       }
+      
+      .toast, .modal-overlay {
+        display: none !important;
+      }
     }
     
     /* Report Print Styles */
     .report-container {
       display: none;
       background: white;
-      padding: 40px;
-      margin-top: 30px;
+      padding: 25px;
+      margin-top: 20px;
       border: 3px solid #1e3a8a;
-      border-radius: 15px;
+      border-radius: 12px;
     }
     
     .report-container.active {
@@ -312,57 +506,57 @@
     
     .report-header {
       text-align: center;
-      margin-bottom: 40px;
-      padding-bottom: 25px;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
       border-bottom: 3px solid #1e3a8a;
     }
     
     .report-logo {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 20px;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 15px;
       background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 48px;
+      font-size: 36px;
       color: white;
       font-weight: 800;
     }
     
     .report-title {
-      font-size: 32px;
+      font-size: 22px;
       font-weight: 800;
       color: #1e3a8a;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       text-transform: uppercase;
     }
     
     .report-subtitle {
-      font-size: 18px;
+      font-size: 14px;
       color: #6b7280;
       font-weight: 600;
     }
     
     .report-meta {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 30px;
-      padding: 20px;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 25px;
+      padding: 15px;
       background: #f9fafb;
       border-radius: 10px;
     }
     
     .report-meta-item {
-      font-size: 14px;
+      font-size: 12px;
     }
     
     .report-meta-label {
       font-weight: 700;
       color: #1e3a8a;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
     
     .report-meta-value {
@@ -374,23 +568,34 @@
       width: 100%;
       border-collapse: collapse;
       margin: 20px 0;
+      font-size: 12px;
+      overflow-x: auto;
+      display: block;
+    }
+    
+    .report-table thead,
+    .report-table tbody {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
     }
     
     .report-table th {
       background: #1e3a8a;
       color: white;
-      padding: 12px;
+      padding: 10px 8px;
       text-align: left;
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 12px;
-      letter-spacing: 0.5px;
+      font-size: 10px;
+      letter-spacing: 0.3px;
     }
     
     .report-table td {
-      padding: 12px;
+      padding: 10px 8px;
       border-bottom: 1px solid #e5e7eb;
-      font-size: 14px;
+      font-size: 11px;
+      word-break: break-word;
     }
     
     .report-table tbody tr:hover {
@@ -399,31 +604,202 @@
     
     .report-total {
       text-align: right;
-      margin-top: 30px;
-      padding-top: 20px;
+      margin-top: 25px;
+      padding-top: 15px;
       border-top: 3px solid #1e3a8a;
     }
     
     .report-total-label {
-      font-size: 18px;
+      font-size: 14px;
       font-weight: 700;
       color: #1f2937;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     
     .report-total-value {
-      font-size: 36px;
+      font-size: 28px;
       font-weight: 800;
       color: #dc2626;
     }
     
     .report-footer {
-      margin-top: 40px;
-      padding-top: 20px;
+      margin-top: 30px;
+      padding-top: 15px;
       border-top: 2px solid #e5e7eb;
       text-align: center;
       color: #6b7280;
-      font-size: 12px;
+      font-size: 10px;
+    }
+    
+    /* Responsive Design - Tablet */
+    @media (min-width: 640px) {
+      body {
+        padding: 20px;
+      }
+      
+      .dashboard-container {
+        padding: 25px;
+        border-radius: 20px;
+      }
+      
+      .header {
+        padding: 25px 20px;
+        margin-bottom: 30px;
+      }
+      
+      .header h1 {
+        font-size: 32px;
+      }
+      
+      .header p {
+        font-size: 14px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+      
+      .stat-card {
+        padding: 25px 20px;
+      }
+      
+      .stat-value {
+        font-size: 36px;
+      }
+      
+      .section {
+        padding: 25px;
+        margin-bottom: 25px;
+      }
+      
+      .section-title {
+        font-size: 20px;
+      }
+      
+      .categories-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      
+      .form-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      
+      .btn-container {
+        flex-direction: row;
+      }
+      
+      .btn {
+        width: auto;
+        flex: 1;
+      }
+      
+      .report-container {
+        padding: 30px;
+      }
+      
+      .report-meta {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .report-table {
+        font-size: 13px;
+      }
+      
+      .report-table th,
+      .report-table td {
+        padding: 12px 10px;
+      }
+    }
+    
+    /* Responsive Design - Desktop */
+    @media (min-width: 1024px) {
+      body {
+        padding: 30px;
+      }
+      
+      .dashboard-container {
+        padding: 40px;
+      }
+      
+      .header {
+        padding: 30px;
+        margin-bottom: 40px;
+      }
+      
+      .header h1 {
+        font-size: 42px;
+      }
+      
+      .header p {
+        font-size: 16px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+      
+      .stat-card {
+        padding: 30px;
+      }
+      
+      .stat-value {
+        font-size: 42px;
+      }
+      
+      .section {
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+      
+      .section-title {
+        font-size: 24px;
+      }
+      
+      .categories-list {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
+      
+      .form-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+      
+      .report-container {
+        padding: 40px;
+      }
+      
+      .report-logo {
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+      }
+      
+      .report-title {
+        font-size: 32px;
+      }
+      
+      .report-subtitle {
+        font-size: 18px;
+      }
+      
+      .report-table {
+        font-size: 14px;
+      }
+      
+      .report-table th {
+        font-size: 12px;
+      }
+      
+      .report-total-value {
+        font-size: 36px;
+      }
     }
   </style>
 </head>
@@ -516,12 +892,15 @@
         <input type="text" id="encodedBy" placeholder="Enter your name" value="">
       </div>
       
-      <div style="display: flex; gap: 15px; margin-top: 25px;">
+      <div class="btn-container">
         <button class="btn btn-primary" onclick="generateReport()">
-          Generate Report
+          📊 Generate Report
         </button>
-        <button class="btn btn-danger" onclick="printReport()" id="printBtn" style="display: none;">
-          Print / Save as PDF
+        <button class="btn btn-danger no-print" onclick="printReport()" id="printBtn" style="display: none;">
+          🖨️ Print Report
+        </button>
+        <button class="btn btn-success no-print" onclick="downloadPDF()" id="pdfBtn" style="display: none;">
+          📄 Download PDF
         </button>
       </div>
     </div>
@@ -571,13 +950,95 @@
     </div>
   </div>
   
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span class="toast-icon" id="toastIcon">✓</span>
+    <span class="toast-message" id="toastMessage">Success!</span>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Confirmation</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Are you sure you want to proceed?
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn btn-primary" onclick="closeModal()">OK</button>
+      </div>
+    </div>
+  </div>
+  
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycby9LLhV20iz1nrbtxZreDNQdliorHe11MObk7jDmoCze6nxKbIqb6KMZU053t742PWPZQ/exec';
+    
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      // Set icon based on type
+      const icons = {
+        success: '✓',
+        error: '✕',
+        info: 'ℹ',
+        warning: '⚠'
+      };
+      
+      toast.className = `toast ${type}`;
+      toastIcon.textContent = icons[type] || icons.success;
+      toastMessage.textContent = message;
+      
+      // Show toast
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Modal System
+    function showModal(title, body, footer = null) {
+      const overlay = document.getElementById('modalOverlay');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      const modalFooter = document.getElementById('modalFooter');
+      
+      modalTitle.textContent = title;
+      modalBody.innerHTML = body;
+      
+      if (footer) {
+        modalFooter.innerHTML = footer;
+      } else {
+        modalFooter.innerHTML = '<button class="btn btn-primary" onclick="closeModal()" style="width: 100%;">OK</button>';
+      }
+      
+      overlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal(event) {
+      if (event && event.target !== document.getElementById('modalOverlay')) {
+        return;
+      }
+      
+      const overlay = document.getElementById('modalOverlay');
+      overlay.classList.remove('show');
+      document.body.style.overflow = '';
+    }
     
     // Initialize
     window.addEventListener('DOMContentLoaded', function() {
       setCurrentDate();
       loadDashboard();
+      showToast('Dashboard loaded successfully!', 'success');
     });
     
     function setCurrentDate() {
@@ -589,33 +1050,33 @@
     
     async function loadDashboard() {
       try {
+        showToast('Loading expense data...', 'info');
         const response = await fetch(API_URL + '?action=getExpenses');
         const data = await response.json();
         
         if (data.success) {
           updateStatistics(data.data);
           updateCategories(data.data);
+          showToast('Data loaded successfully!', 'success');
+        } else {
+          showToast('Failed to load data', 'error');
         }
       } catch (error) {
         console.error('Error loading dashboard:', error);
+        showToast('Error connecting to server', 'error');
       }
     }
     
     function updateStatistics(expenses) {
       let totalExpenses = 0;
-      let cashRemaining = 0;
       
       expenses.forEach(expense => {
         totalExpenses += parseFloat(expense.finalExpense || 0);
       });
       
-      // This would need a separate API call to get cash data
-      // For now, we'll just show the expense total
+      document.getElementById('totalExpenses').textContent = '₱' + totalExpenses.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('totalTransactions').textContent = expenses.length.toLocaleString();
       
-      document.getElementById('totalExpenses').textContent = '₱' + totalExpenses.toFixed(2);
-      document.getElementById('totalTransactions').textContent = expenses.length;
-      
-      // You'll need to implement getCashData in your API
       loadCashData();
     }
     
@@ -626,7 +1087,7 @@
         
         if (data.success && data.data.length > 0) {
           const latestCash = data.data[0];
-          document.getElementById('cashRemaining').textContent = '₱' + parseFloat(latestCash.availableCashRemaining || 0).toFixed(2);
+          document.getElementById('cashRemaining').textContent = '₱' + parseFloat(latestCash.availableCashRemaining || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
       } catch (error) {
         console.error('Error loading cash data:', error);
@@ -649,32 +1110,50 @@
         categories[desc].count++;
       });
       
-      // Convert to array and sort by total
       const sortedCategories = Object.values(categories).sort((a, b) => b.total - a.total);
       
-      // Display top 6 categories
       const container = document.getElementById('categoriesList');
       container.innerHTML = '';
       
       sortedCategories.slice(0, 6).forEach(cat => {
         const item = document.createElement('div');
         item.className = 'category-item';
+        item.onclick = () => showCategoryDetails(cat);
         item.innerHTML = `
           <div class="category-name">${cat.name}</div>
-          <div class="category-amount">₱${cat.total.toFixed(2)}</div>
+          <div class="category-amount">₱${cat.total.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
           <div class="category-count">${cat.count} transaction${cat.count > 1 ? 's' : ''}</div>
         `;
         container.appendChild(item);
       });
     }
     
+    function showCategoryDetails(category) {
+      const body = `
+        <div style="padding: 10px 0;">
+          <p style="margin-bottom: 10px;"><strong>Category:</strong> ${category.name}</p>
+          <p style="margin-bottom: 10px;"><strong>Total Amount:</strong> ₱${category.total.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+          <p style="margin-bottom: 10px;"><strong>Transactions:</strong> ${category.count}</p>
+          <p style="margin-bottom: 10px;"><strong>Average per Transaction:</strong> ₱${(category.total / category.count).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+        </div>
+      `;
+      showModal('Category Details', body);
+    }
+    
     async function generateReport() {
       const month = document.getElementById('reportMonth').value;
       const week = document.getElementById('reportWeek').value;
       const year = document.getElementById('reportYear').value;
-      const encodedBy = document.getElementById('encodedBy').value || 'System User';
+      const encodedBy = document.getElementById('encodedBy').value;
       
-      // Calculate date range for the week
+      if (!encodedBy.trim()) {
+        showToast('Please enter your name in "Encoded By" field', 'warning');
+        document.getElementById('encodedBy').focus();
+        return;
+      }
+      
+      showToast('Generating report...', 'info');
+      
       const weekNum = parseInt(week);
       const startDay = (weekNum - 1) * 7 + 1;
       const endDay = Math.min(startDay + 6, 31);
@@ -687,16 +1166,18 @@
         const data = await response.json();
         
         if (data.success) {
-          // Filter expenses by date range
           const filteredExpenses = data.data.filter(expense => {
             return expense.date >= startDate && expense.date <= endDate;
           });
           
           displayReport(filteredExpenses, month, week, year, encodedBy, startDate, endDate);
+          showToast('Report generated successfully!', 'success');
+        } else {
+          showToast('Failed to generate report', 'error');
         }
       } catch (error) {
         console.error('Error generating report:', error);
-        alert('Error generating report. Please try again.');
+        showToast('Error generating report. Please try again.', 'error');
       }
     }
     
@@ -705,42 +1186,46 @@
                           'July', 'August', 'September', 'October', 'November', 'December'];
       const monthName = monthNames[parseInt(month) - 1];
       
-      // Update report period
       document.getElementById('reportPeriod').textContent = `${monthName} ${year} - Week ${week}`;
-      document.getElementById('metaPeriod').textContent = `${monthName} ${week}, ${year} (${startDate} to ${endDate})`;
-      document.getElementById('metaGenerated').textContent = new Date().toLocaleString();
+      document.getElementById('metaPeriod').textContent = `${monthName} Week ${week}, ${year} (${formatDate(startDate)} to ${formatDate(endDate)})`;
+      document.getElementById('metaGenerated').textContent = new Date().toLocaleString('en-PH', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
       document.getElementById('metaEncodedBy').textContent = encodedBy;
       
-      // Calculate total
       let total = 0;
       let tableHTML = `
         <table class="report-table">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Expense ID</th>
-              <th>Location</th>
-              <th>Description</th>
-              <th>Personnel</th>
-              <th>Amount</th>
+              <th style="width: 12%;">Date</th>
+              <th style="width: 15%;">Expense ID</th>
+              <th style="width: 18%;">Location</th>
+              <th style="width: 20%;">Description</th>
+              <th style="width: 18%;">Personnel</th>
+              <th style="width: 17%;">Amount</th>
             </tr>
           </thead>
           <tbody>
       `;
       
       if (expenses.length === 0) {
-        tableHTML += '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">No expenses found for this period</td></tr>';
+        tableHTML += '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">📭 No expenses found for this period</td></tr>';
       } else {
         expenses.forEach(expense => {
           total += parseFloat(expense.finalExpense || 0);
           tableHTML += `
             <tr>
-              <td>${expense.date}</td>
+              <td>${formatDate(expense.date)}</td>
               <td style="font-weight: 600; color: #1e3a8a;">${expense.expenseId}</td>
               <td>${expense.location}</td>
               <td>${expense.description}</td>
               <td>${expense.personnelInCharge}</td>
-              <td style="font-weight: 700; color: #dc2626;">₱${parseFloat(expense.finalExpense || 0).toFixed(2)}</td>
+              <td style="font-weight: 700; color: #dc2626;">₱${parseFloat(expense.finalExpense || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             </tr>
           `;
         });
@@ -751,21 +1236,92 @@
         </table>
         <div class="report-total">
           <div class="report-total-label">Total Expenses:</div>
-          <div class="report-total-value">₱${total.toFixed(2)}</div>
+          <div class="report-total-value">₱${total.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
         </div>
       `;
       
       document.getElementById('reportContent').innerHTML = tableHTML;
       document.getElementById('reportContainer').classList.add('active');
       document.getElementById('printBtn').style.display = 'inline-block';
+      document.getElementById('pdfBtn').style.display = 'inline-block';
       
-      // Scroll to report
-      document.getElementById('reportContainer').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('reportContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    function formatDate(dateString) {
+      const date = new Date(dateString + 'T00:00:00');
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
     }
     
     function printReport() {
-      window.print();
+      showToast('Preparing to print...', 'info');
+      setTimeout(() => {
+        window.print();
+        showToast('Print dialog opened!', 'success');
+      }, 500);
     }
+    
+    function downloadPDF() {
+      const encodedBy = document.getElementById('encodedBy').value || 'User';
+      const month = document.getElementById('reportMonth').value;
+      const week = document.getElementById('reportWeek').value;
+      const year = document.getElementById('reportYear').value;
+      
+      showToast('Generating PDF...', 'info');
+      
+      const element = document.getElementById('reportContainer');
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Expense_Report_${year}_M${month}_W${week}_${encodedBy.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          logging: false
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait' 
+        }
+      };
+      
+      html2pdf().set(opt).from(element).save().then(() => {
+        showToast('PDF downloaded successfully!', 'success');
+      }).catch(error => {
+        console.error('PDF generation error:', error);
+        showToast('Error generating PDF. Please try Print instead.', 'error');
+      });
+    }
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      // Escape key to close modal
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+      
+      // Ctrl/Cmd + P for print (when report is visible)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        const reportContainer = document.getElementById('reportContainer');
+        if (reportContainer.classList.contains('active')) {
+          e.preventDefault();
+          printReport();
+        }
+      }
+    });
+    
+    // Prevent zoom on double tap (mobile)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(event) {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
   </script>
 </body>
 </html>
