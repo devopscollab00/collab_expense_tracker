@@ -498,10 +498,16 @@
       margin-top: 20px;
       border: 3px solid #1e3a8a;
       border-radius: 12px;
+      page-break-inside: avoid;
     }
     
     .report-container.active {
       display: block;
+    }
+    
+    .report-print {
+      background: white;
+      position: relative;
     }
     
     .report-header {
@@ -569,33 +575,28 @@
       border-collapse: collapse;
       margin: 20px 0;
       font-size: 12px;
-      overflow-x: auto;
-      display: block;
-    }
-    
-    .report-table thead,
-    .report-table tbody {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
     }
     
     .report-table th {
       background: #1e3a8a;
       color: white;
-      padding: 10px 8px;
+      padding: 10px 5px;
       text-align: left;
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 10px;
-      letter-spacing: 0.3px;
+      font-size: 9px;
+      letter-spacing: 0.2px;
+      line-height: 1.2;
+      word-wrap: break-word;
+      vertical-align: top;
     }
     
     .report-table td {
-      padding: 10px 8px;
+      padding: 10px 5px;
       border-bottom: 1px solid #e5e7eb;
       font-size: 11px;
       word-break: break-word;
+      vertical-align: top;
     }
     
     .report-table tbody tr:hover {
@@ -709,9 +710,14 @@
         font-size: 13px;
       }
       
-      .report-table th,
+      .report-table th {
+        font-size: 10px;
+        padding: 12px 8px;
+      }
+      
       .report-table td {
-        padding: 12px 10px;
+        padding: 12px 8px;
+        font-size: 12px;
       }
     }
     
@@ -794,7 +800,13 @@
       }
       
       .report-table th {
-        font-size: 12px;
+        font-size: 11px;
+        padding: 14px 10px;
+      }
+      
+      .report-table td {
+        padding: 14px 10px;
+        font-size: 13px;
       }
       
       .report-total-value {
@@ -1202,12 +1214,12 @@
         <table class="report-table">
           <thead>
             <tr>
-              <th style="width: 12%;">Date</th>
-              <th style="width: 15%;">Expense ID</th>
-              <th style="width: 18%;">Location</th>
-              <th style="width: 20%;">Description</th>
-              <th style="width: 18%;">Personnel</th>
-              <th style="width: 17%;">Amount</th>
+              <th style="width: 14%;">DATE</th>
+              <th style="width: 16%;">EXPENSE ID</th>
+              <th style="width: 17%;">LOCATION</th>
+              <th style="width: 18%;">DESCRIPTION</th>
+              <th style="width: 17%;">PERSONNEL</th>
+              <th style="width: 18%; text-align: right;">AMOUNT</th>
             </tr>
           </thead>
           <tbody>
@@ -1225,7 +1237,7 @@
               <td>${expense.location}</td>
               <td>${expense.description}</td>
               <td>${expense.personnelInCharge}</td>
-              <td style="font-weight: 700; color: #dc2626;">₱${parseFloat(expense.finalExpense || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td style="font-weight: 700; color: #dc2626; text-align: right;">₱${parseFloat(expense.finalExpense || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             </tr>
           `;
         });
@@ -1268,26 +1280,43 @@
       const week = document.getElementById('reportWeek').value;
       const year = document.getElementById('reportYear').value;
       
-      showToast('Generating PDF...', 'info');
+      // Check if report is generated
+      const reportContainer = document.getElementById('reportContainer');
+      if (!reportContainer.classList.contains('active')) {
+        showToast('Please generate a report first!', 'warning');
+        return;
+      }
       
-      const element = document.getElementById('reportContainer');
+      showToast('Generating PDF... Please wait', 'info');
+      
+      // Clone the report container to avoid modifying the original
+      const element = reportContainer.cloneNode(true);
+      element.style.display = 'block';
+      element.style.padding = '20px';
+      element.style.background = 'white';
+      
       const opt = {
         margin: [10, 10, 10, 10],
         filename: `Expense_Report_${year}_M${month}_W${week}_${encodedBy.replace(/\s+/g, '_')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 0.95 },
         html2canvas: { 
           scale: 2,
           useCORS: true,
           letterRendering: true,
-          logging: false
+          logging: false,
+          windowWidth: 1200,
+          windowHeight: element.scrollHeight
         },
         jsPDF: { 
           unit: 'mm', 
           format: 'a4', 
-          orientation: 'portrait' 
-        }
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
       
+      // Use the cloned element for PDF generation
       html2pdf().set(opt).from(element).save().then(() => {
         showToast('PDF downloaded successfully!', 'success');
       }).catch(error => {
