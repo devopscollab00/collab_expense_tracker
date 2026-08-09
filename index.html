@@ -856,16 +856,29 @@
         <div class="stat-subtitle">All time expenditure</div>
       </div>
       
-      <div class="stat-card cash">
-        <div class="stat-label">Cash Remaining</div>
-        <div class="stat-value cash" id="cashRemaining">₱0.00</div>
-        <div class="stat-subtitle">Available balance</div>
+      <div class="stat-card">
+        <div class="stat-label">Amount Released</div>
+        <div class="stat-value" id="amountReleased">₱0.00</div>
+        <div class="stat-subtitle">Total cash distributed</div>
       </div>
       
-      <div class="stat-card">
-        <div class="stat-label">Total Transactions</div>
-        <div class="stat-value" id="totalTransactions">0</div>
-        <div class="stat-subtitle">Number of expenses recorded</div>
+      <div class="stat-card cash">
+        <div class="stat-label">Total Sukli</div>
+        <div class="stat-value cash" id="totalSukli">₱0.00</div>
+        <div class="stat-subtitle">Change returned</div>
+      </div>
+    </div>
+    
+    <!-- Personnel Summary Section -->
+    <div class="section">
+      <div class="section-title">
+        👥 Personnel Summary
+      </div>
+      <div class="categories-list" id="personnelList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading personnel data...</p>
+        </div>
       </div>
     </div>
     
@@ -890,37 +903,13 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label for="reportMonth">Month</label>
-          <select id="reportMonth">
-            <option value="01">January</option>
-            <option value="02">February</option>
-            <option value="03">March</option>
-            <option value="04">April</option>
-            <option value="05">May</option>
-            <option value="06">June</option>
-            <option value="07">July</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
+          <label for="reportStartDate">Start Date</label>
+          <input type="date" id="reportStartDate" required>
         </div>
         
         <div class="form-group">
-          <label for="reportWeek">Week</label>
-          <select id="reportWeek">
-            <option value="1">Week 1 (1-7)</option>
-            <option value="2">Week 2 (8-14)</option>
-            <option value="3">Week 3 (15-21)</option>
-            <option value="4">Week 4 (22-28)</option>
-            <option value="5">Week 5 (29-31)</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="reportYear">Year</label>
-          <input type="number" id="reportYear" value="2026" min="2020" max="2030">
+          <label for="reportEndDate">End Date</label>
+          <input type="date" id="reportEndDate" required>
         </div>
       </div>
       
@@ -1073,16 +1062,18 @@
     
     // Initialize
     window.addEventListener('DOMContentLoaded', function() {
-      setCurrentDate();
+      setDefaultDates();
       loadDashboard();
       showToast('Dashboard loaded successfully!', 'success');
     });
     
-    function setCurrentDate() {
+    function setDefaultDates() {
       const now = new Date();
-      const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-      document.getElementById('reportMonth').value = currentMonth;
-      document.getElementById('reportYear').value = now.getFullYear();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      
+      document.getElementById('reportStartDate').valueAsDate = firstDay;
+      document.getElementById('reportEndDate').valueAsDate = lastDay;
     }
     
     async function loadDashboard() {
@@ -1093,6 +1084,7 @@
         
         if (data.success) {
           updateStatistics(data.data);
+          updatePersonnelSummary(data.data);
           updateCategories(data.data);
           showToast('Data loaded successfully!', 'success');
         } else {
@@ -1106,29 +1098,69 @@
     
     function updateStatistics(expenses) {
       let totalExpenses = 0;
+      let totalSukli = 0;
+      let amountReleased = 0;
       
       expenses.forEach(expense => {
         totalExpenses += parseFloat(expense.finalExpense || 0);
+        totalSukli += parseFloat(expense.sukli || 0);
+        amountReleased += parseFloat(expense.cashRelease || 0);
       });
       
       document.getElementById('totalExpenses').textContent = '₱' + totalExpenses.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('totalTransactions').textContent = expenses.length.toLocaleString();
-      
-      loadCashData();
+      document.getElementById('amountReleased').textContent = '₱' + amountReleased.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('totalSukli').textContent = '₱' + totalSukli.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
     
-    async function loadCashData() {
-      try {
-        const response = await fetch(API_URL + '?action=getCashData');
-        const data = await response.json();
-        
-        if (data.success && data.data.length > 0) {
-          const latestCash = data.data[0];
-          document.getElementById('cashRemaining').textContent = '₱' + parseFloat(latestCash.availableCashRemaining || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    function updatePersonnelSummary(expenses) {
+      const personnelData = {};
+      
+      expenses.forEach(expense => {
+        const personnel = expense.personnelInCharge || 'Unknown';
+        if (!personnelData[personnel]) {
+          personnelData[personnel] = {
+            name: personnel,
+            amountReleased: 0,
+            totalExpense: 0,
+            sukli: 0
+          };
         }
-      } catch (error) {
-        console.error('Error loading cash data:', error);
-      }
+        personnelData[personnel].amountReleased += parseFloat(expense.cashRelease || 0);
+        personnelData[personnel].totalExpense += parseFloat(expense.finalExpense || 0);
+        personnelData[personnel].sukli += parseFloat(expense.sukli || 0);
+      });
+      
+      const sortedPersonnel = Object.values(personnelData).sort((a, b) => b.totalExpense - a.totalExpense);
+      
+      const container = document.getElementById('personnelList');
+      container.innerHTML = '';
+      
+      sortedPersonnel.forEach(person => {
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.onclick = () => showPersonnelDetails(person);
+        item.innerHTML = `
+          <div class="category-name">👤 ${person.name}</div>
+          <div style="margin-top: 8px; font-size: 11px; color: #6b7280;">
+            <div style="margin-bottom: 4px;">💵 Released: <strong style="color: #1e3a8a;">₱${person.amountReleased.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>
+            <div style="margin-bottom: 4px;">📊 Expense: <strong style="color: #dc2626;">₱${person.totalExpense.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>
+            <div>💰 Sukli: <strong style="color: #059669;">₱${person.sukli.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+    
+    function showPersonnelDetails(person) {
+      const body = `
+        <div style="padding: 10px 0;">
+          <p style="margin-bottom: 10px;"><strong>Personnel:</strong> ${person.name}</p>
+          <p style="margin-bottom: 10px;"><strong>Amount Released:</strong> ₱${person.amountReleased.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+          <p style="margin-bottom: 10px;"><strong>Total Expense:</strong> ₱${person.totalExpense.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+          <p style="margin-bottom: 10px;"><strong>Sukli (Change):</strong> ₱${person.sukli.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+        </div>
+      `;
+      showModal('Personnel Details', body);
     }
     
     function updateCategories(expenses) {
@@ -1178,10 +1210,14 @@
     }
     
     async function generateReport() {
-      const month = document.getElementById('reportMonth').value;
-      const week = document.getElementById('reportWeek').value;
-      const year = document.getElementById('reportYear').value;
+      const startDate = document.getElementById('reportStartDate').value;
+      const endDate = document.getElementById('reportEndDate').value;
       const encodedBy = document.getElementById('encodedBy').value;
+      
+      if (!startDate || !endDate) {
+        showToast('Please select both start and end dates', 'warning');
+        return;
+      }
       
       if (!encodedBy.trim()) {
         showToast('Please enter your name in "Encoded By" field', 'warning');
@@ -1189,14 +1225,12 @@
         return;
       }
       
+      if (new Date(startDate) > new Date(endDate)) {
+        showToast('Start date must be before end date', 'error');
+        return;
+      }
+      
       showToast('Generating report...', 'info');
-      
-      const weekNum = parseInt(week);
-      const startDay = (weekNum - 1) * 7 + 1;
-      const endDay = Math.min(startDay + 6, 31);
-      
-      const startDate = `${year}-${month}-${String(startDay).padStart(2, '0')}`;
-      const endDate = `${year}-${month}-${String(endDay).padStart(2, '0')}`;
       
       try {
         const response = await fetch(API_URL + `?action=getExpenses`);
@@ -1207,7 +1241,7 @@
             return expense.date >= startDate && expense.date <= endDate;
           });
           
-          displayReport(filteredExpenses, month, week, year, encodedBy, startDate, endDate);
+          displayReport(filteredExpenses, startDate, endDate, encodedBy);
           showToast('Report generated successfully!', 'success');
         } else {
           showToast('Failed to generate report', 'error');
@@ -1218,13 +1252,9 @@
       }
     }
     
-    function displayReport(expenses, month, week, year, encodedBy, startDate, endDate) {
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                          'July', 'August', 'September', 'October', 'November', 'December'];
-      const monthName = monthNames[parseInt(month) - 1];
-      
-      document.getElementById('reportPeriod').textContent = `${monthName} ${year} - Week ${week}`;
-      document.getElementById('metaPeriod').textContent = `${monthName} Week ${week}, ${year} (${formatDate(startDate)} to ${formatDate(endDate)})`;
+    function displayReport(expenses, startDate, endDate, encodedBy) {
+      document.getElementById('reportPeriod').textContent = `Expense Report`;
+      document.getElementById('metaPeriod').textContent = `${formatDate(startDate)} to ${formatDate(endDate)}`;
       document.getElementById('metaGenerated').textContent = new Date().toLocaleString('en-PH', { 
         year: 'numeric', 
         month: 'long', 
@@ -1301,9 +1331,8 @@
     
     function downloadPDF() {
       const encodedBy = document.getElementById('encodedBy').value || 'User';
-      const month = document.getElementById('reportMonth').value;
-      const week = document.getElementById('reportWeek').value;
-      const year = document.getElementById('reportYear').value;
+      const startDate = document.getElementById('reportStartDate').value;
+      const endDate = document.getElementById('reportEndDate').value;
       
       // Check if report is generated
       const reportContainer = document.getElementById('reportContainer');
@@ -1324,7 +1353,7 @@
       
       const opt = {
         margin: 15,
-        filename: `Expense_Report_${year}_M${month}_W${week}_${encodedBy.replace(/\s+/g, '_')}.pdf`,
+        filename: `Expense_Report_${startDate}_to_${endDate}_${encodedBy.replace(/\s+/g, '_')}.pdf`,
         image: { 
           type: 'jpeg', 
           quality: 0.98 
