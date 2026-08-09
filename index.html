@@ -769,7 +769,7 @@
       }
       
       .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 25px;
         margin-bottom: 40px;
       }
@@ -856,16 +856,10 @@
         <div class="stat-subtitle">All time expenditure</div>
       </div>
       
-      <div class="stat-card">
-        <div class="stat-label">Amount Released</div>
-        <div class="stat-value" id="amountReleased">₱0.00</div>
-        <div class="stat-subtitle">Total cash distributed</div>
-      </div>
-      
       <div class="stat-card cash">
-        <div class="stat-label">Total Sukli</div>
-        <div class="stat-value cash" id="totalSukli">₱0.00</div>
-        <div class="stat-subtitle">Change returned</div>
+        <div class="stat-label">Total Remaining Cash</div>
+        <div class="stat-value cash" id="cashRemaining">₱0.00</div>
+        <div class="stat-subtitle">Available balance</div>
       </div>
     </div>
     
@@ -1088,18 +1082,30 @@
     
     function updateStatistics(expenses) {
       let totalExpenses = 0;
-      let totalSukli = 0;
-      let amountReleased = 0;
       
       expenses.forEach(expense => {
         totalExpenses += parseFloat(expense.finalExpense || 0);
-        totalSukli += parseFloat(expense.sukli || 0);
-        amountReleased += parseFloat(expense.cashRelease || 0);
       });
       
       document.getElementById('totalExpenses').textContent = '₱' + totalExpenses.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('amountReleased').textContent = '₱' + amountReleased.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      document.getElementById('totalSukli').textContent = '₱' + totalSukli.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      
+      // Load cash remaining data
+      loadCashData();
+    }
+    
+    async function loadCashData() {
+      try {
+        const response = await fetch(API_URL + '?action=getCashData');
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+          const latestCash = data.data[0];
+          document.getElementById('cashRemaining').textContent = '₱' + parseFloat(latestCash.availableCashRemaining || 0).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+      } catch (error) {
+        console.error('Error loading cash data:', error);
+        document.getElementById('cashRemaining').textContent = '₱0.00';
+      }
     }
     
     function updateCategories(expenses) {
