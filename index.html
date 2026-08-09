@@ -876,18 +876,6 @@
       </div>
     </div>
     
-    <!-- Top Categories Section -->
-    <div class="section">
-      <div class="section-title">
-        🏆 Top Categories by Purchase
-      </div>
-      <div class="categories-list" id="categoriesList">
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Loading categories...</p>
-        </div>
-      </div>
-    </div>
     
     <!-- Generate Report Section -->
     <div class="section report-section">
@@ -1159,7 +1147,7 @@
             count: 0
           };
         }
-        personnelData[personnel].amountReleased += parseFloat(expense.cashRelease || 0);
+        personnelData[personnel].amountReleased += parseFloat(expense.amountRelease || 0);
         personnelData[personnel].totalExpense += parseFloat(expense.finalExpense || 0);
         personnelData[personnel].sukli += parseFloat(expense.sukli || 0);
         personnelData[personnel].count++;
